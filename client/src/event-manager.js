@@ -30,6 +30,21 @@ export class EventManager {
         this.#updateActivityLogComponent(`${user.userName} joined!`)
     }
 
+    message(message){
+        this.eventEmitter.emit(
+            events.app.MESSAGE_RECEIVED,
+            message
+        )
+    }
+
+    disconnectUser(user){
+        const { userName, id } = user;
+        this.#allUsers.delete(id)
+
+        this.#updateActivityLogComponent(`${userName} left!`)
+        this.#updateUsersComponent()
+    }
+
     #updateUsersComponent() {
         this.eventEmitter.emit(
             events.app.STATUS_UPDATED,
