@@ -1,5 +1,12 @@
 export const events = {
-    MESSAGE_RECEIVED: 'message:received',
-    ACTIVITY_LOG_UPDATED: 'activity_log:updated',
-    STATUS_UPDATED: 'status:updated'
+    app:{
+        MESSAGE_RECEIVED: 'message:received',
+        MESSAGE_SENT: 'message:sent',
+        ACTIVITY_LOG_UPDATED: 'activityLog:updated',
+        STATUS_UPDATED: 'status:updated',
+    },
+    socket:{
+        JOIN_ROOM: 'joinRoom',
+        MESSAGE: 'message'
+    }
 }

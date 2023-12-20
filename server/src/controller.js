@@ -1,7 +1,10 @@
+import { events } from "./events.js";
+
 export class Controller {
  
 
     #users = new Map();
+    #rooms = new Map();
 
     constructor({ socketServer }) {
         this.socketServer = socketServer;
@@ -17,15 +20,72 @@ export class Controller {
         socket.on('end', this.#onSocketClosed(id))
     }
 
-    #onSocketData(id){
-        return data => {
-            console.log('onSocketData', data.toString())
+    broadCast({socketId, roomId, event, message, includeCurrentSocket = false}){
+        const usersOnRoom = this.#rooms.get(roomId)
+
+        for(const [key, user] of usersOnRoom){
+            if(!includeCurrentSocket && key === socketId) continue;
+            this.socketServer.sendMessage(user.socket, event, message)
         }
+    }
+
+    async joinRoom(socketId, userData){
+        console.log(`${userData.userName} joined!  ${[socketId]}`)
+        const {roomId} = userData;
+
+        const user = this.#updateGlobalUserData(socketId, userData)
+        const users = this.#joinUserOnRoom(roomId, user)
+
+        const currentUsers = Array.from(users.values())
+           .map(({id, userName}) => ({userName, id}))
+
+        // atualiza o usuario que conectou sobre os usuarios que ja estao na sala
+        this.socketServer.sendMessage(user.socket, events.UPDATE_USERS, currentUsers)
+
+        this.broadCast({
+            socketId,
+            roomId,
+            message: {id: socketId, userName: userData.userName},
+            event: events.NEW_USER_CONNECTED
+        })
+    }
+
+    message(socketId, data) {
+        const { userName, roomId } = this.#users.get(socketId)
+
+        this.broadCast({
+            roomId,
+            socketId,
+            event: events.MESSAGE,
+            message: { userName, message: data },
+            includeCurrentSocket: true,
+        })
+
+    }
+
+    #joinUserOnRoom(roomId, user){
+        const usersOnRoom = this.#rooms.get(roomId) ?? new Map();
+        usersOnRoom.set(user.id, user)
+        this.#rooms.set(roomId, usersOnRoom)
+
+        return usersOnRoom;
+    }
+    #onSocketData(id){
+            return data => {
+                try{
+                    const { event, message } = JSON.parse(data);
+                    this[event](id, message)
+                }
+                catch(error){
+                    console.error('wrong event format!!!', data.toString())
+                }
+            }
+        
     }
 
     #onSocketClosed(id){
         return data => {
-            console.log('onSocketData', data.toString())
+            console.log('onSocketClosed',id)
         }
     }
 

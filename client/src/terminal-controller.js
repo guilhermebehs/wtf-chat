@@ -27,7 +27,7 @@ export class TerminalController{
     #onInputReceived(eventEmitter){
         return function (){
             const message = this.getValue()
-            eventEmitter.emit(events.MESSAGE_RECEIVED, {userName: 'Guilherme', message})
+            eventEmitter.emit(events.app.MESSAGE_SENT,message)
             this.clearValue()
         }
     }
@@ -66,9 +66,9 @@ export class TerminalController{
     }
 
     #registerEvents(eventEmitter, components){
-        eventEmitter.on(events.MESSAGE_RECEIVED,this.#onMessageReceived(components))
-        eventEmitter.on(events.ACTIVITY_LOG_UPDATED,this.#onActivityLogUpdated(components))
-        eventEmitter.on(events.STATUS_UPDATED,this.#onStatusUpdated(components))
+        eventEmitter.on(events.app.MESSAGE_RECEIVED,this.#onMessageReceived(components))
+        eventEmitter.on(events.app.ACTIVITY_LOG_UPDATED,this.#onActivityLogUpdated(components))
+        eventEmitter.on(events.app.STATUS_UPDATED,this.#onStatusUpdated(components))
     }
 
     async initializeTable(){

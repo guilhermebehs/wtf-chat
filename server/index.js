@@ -45,7 +45,6 @@ eventEmitter.on(events.NEW_USER_CONNECTED, (socket)=>{
     console.log('new connection', socket.id);
     socket.on('data', data => {
         console.log('server received', data.toString())
-        socket.write('World!')
     })
 })
 
